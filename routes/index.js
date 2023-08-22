@@ -3,7 +3,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const crypto = require('crypto');
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const dbConnector = require("../utils/dbConnector");
 const EmailValidation = require("../models/emailValidation");
@@ -33,13 +33,20 @@ router.post("/register", async (req, res, next) => {
       newUser = user;
       now = new Date();
       validateBy = new Date(now);
-      validateBy.setHours(now.getHours() + process.env.EMAIL_VALIDATE_EXPIRATION_HOURS);
+      validateBy.setHours(
+        now.getHours() + process.env.EMAIL_VALIDATE_EXPIRATION_HOURS
+      );
       return EmailValidation.create({
         userId: user.id,
-        token: jwt.sign(crypto.randomBytes(16).toString('hex'), process.env.JWT_KEY),
+        token: jwt.sign(
+          { 
+            sub: user.id,
+          },
+          process.env.JWT_KEY
+        ),
         lastSent: now,
         validateBy: validateBy,
-      })
+      });
     })
     // Send the validation email
     .then((emailValidation) => {
@@ -56,7 +63,12 @@ router.post("/register", async (req, res, next) => {
     // Success response
     .then(() => {
       // TODO: Clean up this message
-      res.status(201).json({ message: "An email was sent to the registered address. Follow the URL to validate your email address and continue as an authenticated user." });
+      res
+        .status(201)
+        .json({
+          message:
+            "An email was sent to the registered address. Follow the URL to validate your email address and continue as an authenticated user.",
+        });
     })
     // Failure response
     .catch((error) => {
@@ -65,7 +77,26 @@ router.post("/register", async (req, res, next) => {
         message:
           process.env.NODE_ENV === "development" ? error : "Error saving user.",
       });
-    })
+    });
+});
+
+router.post("/validate", async (req, res, next) => {
+  let uid = jwt.verify(req.query.token, process.env.JWT_KEY).sub;
+  let user = await User.findByPk(uid);
+  if (!user) {
+    res.status(404).json({ message: 'User not found.' });
+  }
+  let emailValidation = await EmailValidation.findByPk(uid);
+  if (!emailValidation) {
+    res.status(404).json({ message: 'Error validating email.' });
+  }
+  let now = new Date();
+  if (emailValidation.validateBy <= now) {
+    res.status(403).json({ message: 'Validation token expired. Try resending email.' });
+  }
+  emailValidation.validatedAt = now;
+  await emailValidation.save();
+  res.status(200).send({ message: 'Email validated.' });
 });
 
 module.exports = router;

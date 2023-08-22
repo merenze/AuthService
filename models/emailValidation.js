@@ -19,11 +19,6 @@ EmailValidation.init(
         model: 'User'
       }
     },
-    // The token used to validate the email
-    token: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     // The last time a validation link was sent
     lastSent: {
       type: DataTypes.DATE,

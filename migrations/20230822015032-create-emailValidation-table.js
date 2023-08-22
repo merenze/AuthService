@@ -13,10 +13,6 @@ module.exports = {
           model: 'users'
         }
       },
-      token: {
-        type: Sequelize.STRING,
-        unique: true,
-      },
       lastSent: Sequelize.DATE,
       validateBy: Sequelize.DATE,
       validatedAt: Sequelize.DATE,
