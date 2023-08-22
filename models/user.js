@@ -1,6 +1,7 @@
 // models/user.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../utils/dbConnector');
+const EmailValidation = require('./emailValidation')
 
 class User extends Model { }
 
@@ -36,5 +37,9 @@ User.init({
     sequelize,
     modelName: 'User',
 });
+
+User.associate = (models) => {
+    User.hasOne(models.EmailValidation);
+};
 
 module.exports = User;
