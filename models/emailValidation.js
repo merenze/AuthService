@@ -11,6 +11,14 @@ class EmailValidation extends Model {
 
 EmailValidation.init(
   {
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      references: {
+        model: 'User'
+      }
+    },
     // The token used to validate the email
     token: {
       type: DataTypes.STRING,
