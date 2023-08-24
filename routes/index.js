@@ -15,8 +15,6 @@ router.get("/", function (req, res, next) {
 });
 
 router.post("/login", loginController);
-
-// Register a user
 router.post("/register", registerController);
 
 router.post("/validate", async (req, res, next) => {

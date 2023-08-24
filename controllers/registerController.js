@@ -18,7 +18,7 @@ const createUser = (req, passwordHash) =>
 
 /**
  * Create an EmailValidation entity associated with the user.
- * @param {*} user User associated with the EmailValidation
+ * @param {User} user User associated with the EmailValidation
  * @returns The created EmailValidation
  */
 const createEmailValidation = (user) => {
@@ -30,38 +30,22 @@ const createEmailValidation = (user) => {
     now.getHours() + process.env.EMAIL_VALIDATE_EXPIRATION_HOURS
   );
   // Create and return the entity
-  return EmailValidation.create({
-    userId: user.id,
-    token: jwt.sign({ sub: user.id }, process.env.JWT_KEY),
-    lastSent: now,
-    validateBy: validateBy,
-  });
+  return {
+    emailValidation: EmailValidation.create({
+      userId: user.id,
+      token: jwt.sign({ sub: user.id }, process.env.JWT_KEY),
+      lastSent: now,
+      validateBy: validateBy,
+    }),
+    user: user,
+  };
 };
 
 /**
- * Indicates success to the client.
+ * Sends the validation email to the user.
+ * @param {*} Object containing the EmailValidation and User.
  */
-const sendSuccessResponse = () => {
-  // TODO: Clean up this message
-  res.status(201).json({
-    message:
-      "An email was sent to the registered address. Follow the URL to validate your email address and continue as an authenticated user.",
-  });
-};
-
-/**
- * Handles an internal error.
- * @param {*} error 
- * @param {*} res 
- */
-const handleServerError = (error, res) => {
-  console.error(error);
-  res.status(500).json({
-    message: process.env.NODE_ENV === "development" ? error : "Internal error",
-  });
-};
-
-const sendEmailValidation = (user) => {
+const sendEmailValidation = ({ emailValidation, user }) => {
   validateUrl = `${process.env.APP_URL}/validate?token=${emailValidation.token}`;
   return sendMail({
     to: user.email,
@@ -72,14 +56,37 @@ const sendEmailValidation = (user) => {
   });
 };
 
+/**
+ * Indicates success to the client.
+ */
+const sendSuccessResponse = (res) => {
+  // TODO: Clean up this message
+  res.status(201).json({
+    message:
+      "An email was sent to the registered address. Follow the URL to validate your email address and continue as an authenticated user.",
+  });
+};
+
+/**
+ * Handles an internal error.
+ * @param {*} error
+ * @param {*} res
+ */
+const handleServerError = (error, res) => {
+  console.error(error);
+  res.status(500).json({
+    message: process.env.NODE_ENV === "development" ? error : "Internal error",
+  });
+};
+
 module.exports = async (req, res, next) => {
   // TODO validate request!
   bcrypt
     .hash(req.body.password, parseInt(process.env.BCRYPT_ROUNDS))
-    .then(createUser)
+    .then((hash) => createUser(req, hash))
     .then(createEmailValidation)
-    .then((emailValidation) => emailValidation.getUser())
+    // .then((emailValidation) => emailValidation.getUser())
     .then(sendEmailValidation)
-    .then(sendSuccessResponse)
+    .then(() => sendSuccessResponse(res))
     .catch((error) => handleServerError(error, res));
 };
