@@ -86,7 +86,7 @@ const assignSession = (res, user) =>
   );
 
 /**
- * Handles a client error
+ * Handles a client error.
  * @param {*} res
  * @param {number} status
  * @param {*} body
