@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const EmailValidation = require("../models/emailValidation");
 const loginController = require('../controllers/loginController');
+const registerController = require('../controllers/registerController');
 const User = require("../models/User");
 const sendMail = require("../utils/mailTransporter");
 
@@ -16,71 +17,7 @@ router.get("/", function (req, res, next) {
 router.post("/login", loginController);
 
 // Register a user
-router.post("/register", async (req, res, next) => {
-  let newUser;
-  // TODO validate request!
-  bcrypt
-    .hash(req.body.password, parseInt(process.env.BCRYPT_ROUNDS))
-    // Create the user
-    .then((hash) => {
-      return User.create({
-        email: req.body.email,
-        passwordHash: hash,
-      });
-    })
-    // Create the EmailValidation
-    .then((user) => {
-      newUser = user;
-      now = new Date();
-      validateBy = new Date(now);
-      validateBy.setHours(
-        now.getHours() + process.env.EMAIL_VALIDATE_EXPIRATION_HOURS
-      );
-      return EmailValidation.create({
-        userId: user.id,
-        token: jwt.sign(
-          {
-            sub: user.id,
-          },
-          process.env.JWT_KEY
-        ),
-        lastSent: now,
-        validateBy: validateBy,
-      });
-    })
-    // Send the validation email
-    .then((emailValidation) => {
-      // TODO There has to be a better way of programmatically getting this route.
-      validateUrl = `${process.env.APP_URL}/validate?token=${emailValidation.token}`;
-      return sendMail({
-        to: newUser.email,
-        // TODO should this subject be an EV, or otherwise configurable?
-        subject: "Validate your address",
-        // TODO give more info than just the link-- probably use a view as a template.
-        text: `<a href="${validateUrl}">Follow to validate</a>`,
-      });
-    })
-    // Success response
-    .then(() => {
-      // TODO: Clean up this message
-      res
-        .status(201)
-        .json({
-        message:
-          "An email was sent to the registered address. Follow the URL to validate your email address and continue as an authenticated user.",
-      });
-    })
-    // Failure response
-    .catch((error) => {
-      console.error(error);
-      res
-        .status(500)
-        .json({
-        message:
-          process.env.NODE_ENV === "development" ? error : "Error saving user.",
-      });
-    });
-});
+router.post("/register", registerController);
 
 router.post("/validate", async (req, res, next) => {
   let uid = jwt.verify(req.query.token, process.env.JWT_KEY).sub;
