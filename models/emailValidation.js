@@ -1,7 +1,5 @@
 // models/emailValidation.js
 const { Model, DataTypes } = require("sequelize");
-const sequelize = require("../utils/dbConnector");
-const User = require("./user");
 
 class EmailValidation extends Model {
   isValidated() {
@@ -9,38 +7,40 @@ class EmailValidation extends Model {
   }
 }
 
-EmailValidation.init(
-  {
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-      references: {
-        model: 'User'
-      }
+module.exports = (sequelize) => {
+  EmailValidation.init(
+    {
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        references: {
+          model: "User",
+        },
+      },
+      // The last time a validation link was sent
+      lastSent: {
+        type: DataTypes.DATE,
+      },
+      // The expiration for the last validation link
+      validateBy: {
+        type: DataTypes.DATE,
+      },
+      // Time the link was validated, if applicable
+      validatedAt: {
+        type: DataTypes.DATE,
+      },
     },
-    // The last time a validation link was sent
-    lastSent: {
-      type: DataTypes.DATE,
-    },
-    // The expiration for the last validation link
-    validateBy: {
-      type: DataTypes.DATE,
-    },
-    // Time the link was validated, if applicable
-    validatedAt: {
-      type: DataTypes.DATE,
-    },
-  },
-  {
-    sequelize,
-    // Using our own timestamps
-    timestamps: false,
-  }
-);
+    {
+      sequelize,
+      // Using our own timestamps
+      timestamps: false,
+    }
+  );
 
-EmailValidation.associate = (models) => {
-  EmailValidation.belongsTo(models.User);
+  EmailValidation.associate = (models) => {
+    EmailValidation.belongsTo(models.User);
+  };
+
+  return EmailValidation;
 };
-
-module.exports = EmailValidation;

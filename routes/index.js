@@ -1,12 +1,10 @@
 // routes/index.js
-// TODO clean this up-- consistent with "consts" and single quotes
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const dbConnector = require("../utils/dbConnector");
 const EmailValidation = require("../models/emailValidation");
+const loginController = require('../controllers/loginController');
 const User = require("../models/User");
 const sendMail = require("../utils/mailTransporter");
 
@@ -14,6 +12,8 @@ const sendMail = require("../utils/mailTransporter");
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
+
+router.post("/login", loginController);
 
 // Register a user
 router.post("/register", async (req, res, next) => {
@@ -39,7 +39,7 @@ router.post("/register", async (req, res, next) => {
       return EmailValidation.create({
         userId: user.id,
         token: jwt.sign(
-          { 
+          {
             sub: user.id,
           },
           process.env.JWT_KEY
@@ -50,7 +50,7 @@ router.post("/register", async (req, res, next) => {
     })
     // Send the validation email
     .then((emailValidation) => {
-      // TODO AThere has to be a better way of programmatically getting this route.
+      // TODO There has to be a better way of programmatically getting this route.
       validateUrl = `${process.env.APP_URL}/validate?token=${emailValidation.token}`;
       return sendMail({
         to: newUser.email,
@@ -66,14 +66,16 @@ router.post("/register", async (req, res, next) => {
       res
         .status(201)
         .json({
-          message:
-            "An email was sent to the registered address. Follow the URL to validate your email address and continue as an authenticated user.",
-        });
+        message:
+          "An email was sent to the registered address. Follow the URL to validate your email address and continue as an authenticated user.",
+      });
     })
     // Failure response
     .catch((error) => {
       console.error(error);
-      res.status(500).json({
+      res
+        .status(500)
+        .json({
         message:
           process.env.NODE_ENV === "development" ? error : "Error saving user.",
       });
@@ -84,19 +86,27 @@ router.post("/validate", async (req, res, next) => {
   let uid = jwt.verify(req.query.token, process.env.JWT_KEY).sub;
   let user = await User.findByPk(uid);
   if (!user) {
-    res.status(404).json({ message: 'User not found.' });
+    res
+      .status(404)
+      .json({ message: "User not found." });
   }
   let emailValidation = await EmailValidation.findByPk(uid);
   if (!emailValidation) {
-    res.status(404).json({ message: 'Error validating email.' });
+    res
+      .status(404)
+      .json({ message: "Error validating email." });
   }
   let now = new Date();
   if (emailValidation.validateBy <= now) {
-    res.status(403).json({ message: 'Validation token expired. Try resending email.' });
+    res
+      .status(403)
+      .json({ message: "Validation token expired. Try resending email." });
   }
   emailValidation.validatedAt = now;
   await emailValidation.save();
-  res.status(200).send({ message: 'Email validated.' });
+  res
+    .status(200)
+    .json({ message: "Email validated." });
 });
 
 module.exports = router;
