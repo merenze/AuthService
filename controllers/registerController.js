@@ -17,36 +17,18 @@ const createUser = (req, passwordHash) =>
   });
 
 /**
- * Create an EmailValidation entity associated with the user.
- * @param {User} user User associated with the EmailValidation
- * @returns The created EmailValidation
- */
-const createEmailValidation = (user) => {
-  // The time this validation was created
-  now = new Date();
-  // The deadline by which to validate
-  validateBy = new Date(now);
-  validateBy.setHours(
-    now.getHours() + process.env.EMAIL_VALIDATE_EXPIRATION_HOURS
-  );
-  // Create and return the entity
-  return {
-    emailValidation: EmailValidation.create({
-      userId: user.id,
-      token: jwt.sign({ sub: user.id }, process.env.JWT_KEY),
-      lastSent: now,
-      validateBy: validateBy,
-    }),
-    user: user,
-  };
-};
-
-/**
  * Sends the validation email to the user.
  * @param {*} Object containing the EmailValidation and User.
  */
-const sendEmailValidation = ({ emailValidation, user }) => {
-  validateUrl = `${process.env.APP_URL}/validate?token=${emailValidation.token}`;
+const sendEmailValidation = (user) => {
+  const now = new Date();
+  const exp = new Date(now);
+  exp.setHours(now.getHours() + process.env.EMAIL_VALIDATE_EXPIRATION_HOURS);
+  const token = jwt.sign({
+    sub: user.id,
+    exp: exp,
+  }, process.env.JWT_KEY);
+  const validateUrl = `${process.env.APP_URL}/validate?token=${token}`;
   return sendMail({
     to: user.email,
     // TODO should this subject be an EV, or otherwise configurable?
@@ -84,8 +66,6 @@ module.exports = async (req, res, next) => {
   bcrypt
     .hash(req.body.password, parseInt(process.env.BCRYPT_ROUNDS))
     .then((hash) => createUser(req, hash))
-    .then(createEmailValidation)
-    // .then((emailValidation) => emailValidation.getUser())
     .then(sendEmailValidation)
     .then(() => sendSuccessResponse(res))
     .catch((error) => handleServerError(error, res));

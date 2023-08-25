@@ -60,7 +60,7 @@ const comparePassword = async (user, password) => {
  * @throws Response as { status, body } if the email is not validated.
  */
 const emailValidated = (user) => {
-  if (!user.emailValidation.isValidated()) {
+  if (!user.emailValidatedAt) {
     console.debug("Not validated");
     throw {
       status: 403,
@@ -125,8 +125,7 @@ module.exports = async (req, res, next) => {
   User.findOne({
     where: {
       email: req.body.email,
-    },
-    include: EmailValidation,
+    }
   })
     .then((user) => userExists(user))
     .then((user) => comparePassword(user, req.body.password))

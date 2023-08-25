@@ -33,6 +33,8 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
+      // Time of email validation
+      emailValidatedAt: DataTypes.DATE,
     },
     { sequelize }
   );
