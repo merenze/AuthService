@@ -2,7 +2,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const { User, EmailValidation } = require("../models/");
+const { User } = require("../models/");
 
 /**
  * Create a user with the given data.
@@ -18,7 +18,7 @@ const createUser = (req, passwordHash) =>
 
 /**
  * Sends the validation email to the user.
- * @param {*} Object containing the EmailValidation and User.
+ * @param {User} user User being registered
  */
 const sendEmailValidation = (user) => {
   const now = new Date();

@@ -9,6 +9,7 @@ const registerController = require('../controllers/registerController');
 const User = require("../models/User");
 const sendMail = require("../utils/mailTransporter");
 const validateController = require("../controllers/validateController");
+const userController = require("../controllers/userController");
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
