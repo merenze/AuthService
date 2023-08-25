@@ -26,7 +26,7 @@ const sendEmailValidation = (user) => {
   exp.setHours(now.getHours() + process.env.EMAIL_VALIDATE_EXPIRATION_HOURS);
   const token = jwt.sign({
     sub: user.id,
-    exp: exp,
+    exp: exp.getTime(),
   }, process.env.JWT_KEY);
   const validateUrl = `${process.env.APP_URL}/validate?token=${token}`;
   return sendMail({
@@ -57,7 +57,7 @@ const sendSuccessResponse = (res) => {
 const handleServerError = (error, res) => {
   console.error(error);
   res.status(500).json({
-    message: process.env.NODE_ENV === "development" ? error : "Internal error",
+    message: process.env.NODE_ENV === "development" ? error.message : "Internal error",
   });
 };
 

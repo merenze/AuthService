@@ -8,6 +8,7 @@ const loginController = require('../controllers/loginController');
 const registerController = require('../controllers/registerController');
 const User = require("../models/User");
 const sendMail = require("../utils/mailTransporter");
+const validateController = require("../controllers/validateController");
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
@@ -16,32 +17,6 @@ router.get("/", function (req, res, next) {
 
 router.post("/login", loginController);
 router.post("/register", registerController);
-
-router.post("/validate", async (req, res, next) => {
-  let uid = jwt.verify(req.query.token, process.env.JWT_KEY).sub;
-  let user = await User.findByPk(uid);
-  if (!user) {
-    res
-      .status(404)
-      .json({ message: "User not found." });
-  }
-  let emailValidation = await EmailValidation.findByPk(uid);
-  if (!emailValidation) {
-    res
-      .status(404)
-      .json({ message: "Error validating email." });
-  }
-  let now = new Date();
-  if (emailValidation.validateBy <= now) {
-    res
-      .status(403)
-      .json({ message: "Validation token expired. Try resending email." });
-  }
-  emailValidation.validatedAt = now;
-  await emailValidation.save();
-  res
-    .status(200)
-    .json({ message: "Email validated." });
-});
+router.post("/validate", validateController);
 
 module.exports = router;

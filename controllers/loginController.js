@@ -103,7 +103,7 @@ const handleClientError = (res, status, body) => {
 const handleServerError = (res, error) => {
   console.error("Login failed:", error);
   res.status(500).json({
-    message: process.env.NODE_ENV === "development" ? error : "Internal error",
+    message: process.env.NODE_ENV === "development" ? error.message : "Internal error",
   });
 };
 
