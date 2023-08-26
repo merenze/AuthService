@@ -28,18 +28,15 @@ const loadConfigurations = () => {
 };
 
 const appConfig = {
-  env: process.env.NODE_ENV || "production",
-  port: process.env.PORT || 3000,
-  protocol: process.env.PROTOCOL || "http",
   domain: process.env.APP_DOMAIN || "localhost",
 };
 
 module.exports = {
     ...loadConfigurations(),
     ...appConfig,
-
-    appUrl: `${appConfig.protocol}://${appConfig.domain}:${appConfig.port}`,
-
+    env: process.env.NODE_ENV || "production",
+    port: process.env.PORT || 3000,
+    url: process.env.APP_URL || `http://localhost:3000`,
     emailValidateExpirationHours: process.env.EMAIL_VALIDATION_EXPIRATION_HOURS || 0,
     sessionExpirationHours: process.env.SESSION_EXPIRATION_HOURS || 0,
 };
