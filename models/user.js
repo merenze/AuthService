@@ -30,24 +30,9 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      // Last known login time
-      lastLogin: {
-        type: DataTypes.DATE,
-      },
-      // Last known request time
-      lastActivity: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
-      },
       // Time of email validation
       emailValidatedAt: DataTypes.DATE,
     },
     { sequelize }
   );
-
-  User.associate = (models) => {
-    User.hasOne(models.EmailValidation);
-  };
-  return User;
 };

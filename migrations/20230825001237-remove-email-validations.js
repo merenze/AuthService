@@ -1,5 +1,4 @@
 "use strict";
-const { EmailValidation } = require("../models/");
 const createEmailValidationsTable =
   require("./20230822015032-create-emailValidation-table").up;
 
@@ -19,7 +18,7 @@ module.exports = {
           `WHERE u.id = ev.userId`,
         { transaction: t }
       );
-      await EmailValidation.drop({ transaction: t });
+      await queryInterface.dropTable("emailValidations");
     }),
 
   down: async (queryInterface, Sequelize) =>
