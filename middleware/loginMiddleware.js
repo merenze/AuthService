@@ -3,9 +3,9 @@
 module.exports = {
   // Validate that the necessary fields are provided in the request body.
   requiredFields: (req, res, next) => {
-    errors = [];
-    if (req.body.email === undefined) errors.push({ email: "required" });
-    if (req.body.password === undefined) errors.push({ password: "required" });
+    const errors = {};
+    if (req.body.email === undefined) errors.email = "required";
+    if (req.body.password === undefined) errors.password = "required";
     if (errors.length <= 0) {
       next();
       return;
@@ -17,6 +17,7 @@ module.exports = {
   },
   // Validate that the user's email is validated
   emailValidated: (req, res, next) => {
+    // TODO EV to determine whether unvalidated users can log in
     if (req.user.emailValidatedAt) {
       next();
       return;
