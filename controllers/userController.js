@@ -1,5 +1,4 @@
 // controllers/userController.js
-const { User } = require("../models")
 
 module.exports = {
 
