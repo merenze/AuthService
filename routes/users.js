@@ -5,6 +5,6 @@ const userMiddleware = require("../middleware/userMiddleware");
 const userController = require("../controllers/userController");
 var router = express.Router();
 
-router.get("/:userId", userMiddleware.userExists, userController.find);
+router.get("/:userId", userMiddleware.findUser, userMiddleware.sanitizeUser, userController.find);
 
 module.exports = router;
