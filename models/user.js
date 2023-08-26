@@ -35,9 +35,4 @@ module.exports = (sequelize) => {
     },
     { sequelize }
   );
-
-  User.associate = (models) => {
-    User.hasOne(models.EmailValidation);
-  };
-  return User;
 };
