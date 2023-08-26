@@ -1,7 +1,7 @@
 // controllers/login.js
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { User, EmailValidation } = require("../models/");
+const { User } = require("../models/");
 
 /**
  * Ensures the email and password field are present in the request body.
@@ -17,22 +17,6 @@ const fieldsPresent = (req) => {
     errors.push({ password: "required" });
   }
   return errors;
-};
-
-/**
- * Ensures the user exists.
- * @param {User} user The user found by the email
- * @returns The passed user
- * @throws Response as { status, body } if the user does not exist.
- */
-const userExists = (user) => {
-  if (user === null) {
-    throw {
-      status: 404,
-      body: { message: "Invalid email or password." },
-    };
-  }
-  return user;
 };
 
 /**
@@ -103,7 +87,8 @@ const handleClientError = (res, status, body) => {
 const handleServerError = (res, error) => {
   console.error("Login failed:", error);
   res.status(500).json({
-    message: process.env.NODE_ENV === "development" ? error.message : "Internal error",
+    message:
+      process.env.NODE_ENV === "development" ? error.message : "Internal error",
   });
 };
 
@@ -113,24 +98,14 @@ const handleServerError = (res, error) => {
  * @param {*} res
  * @param {*} next
  */
-module.exports = async (req, res, next) => {
-  let errors = fieldsPresent(req);
-  if (errors.length) {
-    res.status(400).json({
-      message: "Invalid request",
-      errors: errors,
-    });
-  }
-
+module.exports = async (req, res, next) =>
   User.findOne({
     where: {
       email: req.body.email,
-    }
+    },
   })
-    .then((user) => userExists(user))
     .then((user) => comparePassword(user, req.body.password))
     .then((user) => emailValidated(user))
     .then((user) => assignSession(res, user))
     .catch(({ status, body }) => handleClientError(res, status, body))
     .catch((error) => handleServerError(res, error));
-};
