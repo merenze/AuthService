@@ -25,7 +25,7 @@ const userExists = (user) => {
  * @returns {Promise<User>} Promise which resolves to the user that was saved.
  */
 const validate = async (user) => {
-  user.emailValidation = new Date();
+  user.emailValidatedAt = new Date();
   return user.save();
 };
 
