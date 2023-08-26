@@ -4,22 +4,6 @@ const jwt = require("jsonwebtoken");
 const { User } = require("../models/");
 
 /**
- * Ensures the email and password field are present in the request body.
- * @param {*} req Request
- * @returns Array of errors
- */
-const fieldsPresent = (req) => {
-  const errors = [];
-  if (req.body.email === undefined) {
-    errors.push({ email: "required" });
-  }
-  if (req.body.password === undefined) {
-    errors.push({ password: "required" });
-  }
-  return errors;
-};
-
-/**
  * Compares the password against the one stored for the user.
  * @param {User} user
  * @param {string} password
