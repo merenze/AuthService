@@ -15,7 +15,7 @@ module.exports = (req, res) =>
       jwt.sign(
         {
           sub: req.user.id,
-          purpose: "client-session",
+          purpose: "Client-Session",
           // TODO: EV timeout period
         },
         process.env.JWT_KEY

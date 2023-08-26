@@ -1,7 +1,14 @@
 // models/user.js
 const { Model, DataTypes } = require("sequelize");
 
-class User extends Model {}
+class User extends Model {
+  constructor(props) {
+    super();
+    Object.keys(props).forEach(key => {
+      this[key] = props[key];
+    });
+  }
+}
 
 module.exports = (sequelize) => {
   User.init(
