@@ -1,20 +1,22 @@
 // middleware/loginMiddleware.js
+const bcrypt = require("bcrypt");
 
 module.exports = {
   // Validate that the necessary fields are provided in the request body.
   requiredFields: (req, res, next) => {
-    const errors = {};
-    if (req.body.email === undefined) errors.email = "required";
-    if (req.body.password === undefined) errors.password = "required";
-    if (errors.length <= 0) {
+    const missing = [];
+    if (!req.body.email) missing.push("email");
+    if (!req.body.password) missing.push("password");
+    if (missing.length <= 0) {
       next();
       return;
     }
     res.status(400).json({
       message: "Missing required fields.",
-      errors: errors,
+      missing: missing,
     });
   },
+
   // Validate that the user's email is validated
   emailValidated: (req, res, next) => {
     // TODO EV to determine whether unvalidated users can log in
@@ -24,4 +26,17 @@ module.exports = {
     }
     res.status(403).json({ message: "Email address not yet validated." });
   },
+
+  // Compare the password in the request body to the user's password.
+  comparePassword: async (req, res, next) =>
+    bcrypt
+      .compare(req.body.password, req.user.passwordHash)
+      .then((result) => {
+        if (result) {
+          next();
+          return;
+        }
+        res.status(401).json({ message: "Email or password incorrect." });
+      })
+      .catch((error) => res.status(500).json({ message: "Internal error." })),
 };

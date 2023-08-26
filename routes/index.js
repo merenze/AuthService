@@ -11,6 +11,7 @@ router.post(
   "/login",
   loginMiddleware.requiredFields,
   userMiddleware.findUserByEmail,
+  loginMiddleware.comparePassword,
   loginMiddleware.emailValidated,
   loginController
 );
