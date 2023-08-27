@@ -35,4 +35,5 @@ module.exports = (sequelize) => {
     },
     { sequelize }
   );
+  return User;
 };

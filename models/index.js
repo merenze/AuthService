@@ -16,6 +16,7 @@ const sequelize = config.use_env_variable
 
 fs.readdirSync(__dirname)
   .filter((file) => {
+    console.log("Found file: ", file);
     return (
       file.indexOf(".") !== 0 &&
       file !== basename &&
@@ -24,6 +25,7 @@ fs.readdirSync(__dirname)
     );
   })
   .forEach((file) => {
+    console.log("Using file: " + file);
     const model = require(path.join(__dirname, file))(sequelize);
     db[model.name] = model;
   });
