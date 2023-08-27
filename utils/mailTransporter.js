@@ -1,5 +1,6 @@
 // utils/mailTransporter.js
 const nodemailer = require("nodemailer");
+const config = require("../config");
 
 let transporter;
 
