@@ -27,13 +27,8 @@ const loadConfigurations = () => {
   return config;
 };
 
-const appConfig = {
-  domain: process.env.APP_DOMAIN || "localhost",
-};
-
 module.exports = {
     ...loadConfigurations(),
-    ...appConfig,
     env: process.env.NODE_ENV || "production",
     port: process.env.PORT || 3000,
     url: process.env.APP_URL || `http://localhost:3000`,
