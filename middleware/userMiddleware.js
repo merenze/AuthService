@@ -30,8 +30,9 @@ module.exports = {
   /** Get the user (from an email validation token, provided as a query param) */
   findUserByValidateToken: async (req, res, next) => {
     let token;
+    // Verify the token
     try {
-      token = jwt.decode(req.query.token);
+      token = jwt.verify(req.query.token, config.jwtKey);
     } catch (error) {
       // Handle expired token
       if (error.name === "TokenExpiredError") {
@@ -43,22 +44,27 @@ module.exports = {
       res.status(500).json("Internal error.");
       return;
     }
-    await axios.get(
-      `${config.url}/users/${token.sub}`
-    )
-      .then((response) => {
+    // Given a valid token, find the user
+    User.findByPk(token.sub)
+      .then((user) => {
+        user.isNewRecord = false; // Should not have to explicitly set, but alas.
         // On success, attach the user to the request
-        if (response.status === 200) {
-          req.user = new User(response.data);
+        if (user) {
+          req.user = user;
           next();
           return;
         }
-        // On failure, send the client whatever response was received.
-        res.status(response.status).json(response.data);
+        // Handle failure
+        res.status(404).send();
       })
       .catch((error) => {
         console.error(error);
-        res.status(500).json({ message: error.message })
+        res.status(500).json({
+          message:
+            config.env === "development"
+              ? error.message
+              : "Internal error."
+        });
       });
   },
 

@@ -1,9 +1,8 @@
 // controllers/validateController.js
 
 module.exports = async (req, res) => {
-  req.user.emailValidatedAt = new Date();
   req.user
-    .save({ fields: ["emailValidatedAt"] })
+    .update({ emailValidatedAt: new Date() })
     .then((user) =>
       res.status(200).json({ message: `Validated ${user.email}` })
     )
