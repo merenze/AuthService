@@ -18,7 +18,11 @@ router.post(
   loginController
 );
 
-router.post("/register", registerController);
+router.post(
+  "/register",
+  registerController
+);
+
 router.patch(
   "/validate",
   userMiddleware.findUserByValidateToken,

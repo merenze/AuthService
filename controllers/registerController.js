@@ -1,7 +1,7 @@
 // controllers/registerController.js
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const config = require("../config/");
 const { User } = require("../models/");
 
 /**
@@ -23,18 +23,18 @@ const createUser = (req, passwordHash) =>
 const sendEmailValidation = (user) => {
   const now = new Date();
   const exp = new Date(now);
-  exp.setHours(now.getHours() + process.env.EMAIL_VALIDATE_EXPIRATION_HOURS);
+  exp.setHours(now.getHours() + config.emailValidateExpirationHours);
   const token = jwt.sign({
     sub: user.id,
     exp: exp.getTime(),
-  }, process.env.JWT_KEY);
-  const validateUrl = `${process.env.APP_URL}/validate?token=${token}`;
+  }, config.jwtKey);
+  const validateUrl = `${config.url}/validate?token=${token}`;
   return sendMail({
     to: user.email,
     // TODO should this subject be an EV, or otherwise configurable?
     subject: "Validate your address",
     // TODO give more info than just the link-- probably use a view as a template.
-    text: `<a href="${validateUrl}">Follow to validate</a>`,
+    html: `<a href="${validateUrl}">Follow to validate</a>`,
   });
 };
 
@@ -61,7 +61,7 @@ const handleServerError = (error, res) => {
   });
 };
 
-module.exports = async (req, res, next) => {
+module.exports = async (req, res) => {
   // TODO validate request!
   bcrypt
     .hash(req.body.password, parseInt(process.env.BCRYPT_ROUNDS))
