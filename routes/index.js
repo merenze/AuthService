@@ -22,6 +22,10 @@ router.post(
 
 router.post(
   "/register",
+  validator.body("email").trim().isEmail().withMessage("Invalid email format"),
+  validator.body("password").notEmpty().withMessage("required"),
+  // TODO Custom validator for unique emails
+  loginMiddleware.handleInputValidationErrors,
   registerController
 );
 
