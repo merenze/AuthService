@@ -19,7 +19,11 @@ router.post(
 );
 
 router.post("/register", registerController);
-router.post("/validate", validateController);
+router.post(
+  "/validate",
+  userMiddleware.findUserByValidateToken,
+  validateController
+);
 
 router.get(
   "/whoami",
