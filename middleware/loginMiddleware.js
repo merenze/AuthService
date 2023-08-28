@@ -4,15 +4,28 @@ const handleServerError = require("../utils/handleServerError");
 const validator = require("express-validator");
 
 module.exports = {
-  /** Return a fail response if the input wasn't validated */
+  /**
+   * Return a fail response if the input wasn't valid.
+   * The failure response message is structured as follows:
+   * {
+   *   errors: {
+   *     field1: [ "errormsg1", ... ],
+   *     field2: [ "errormsg1", ... ],
+   *   }
+   * }
+   */
   handleInputValidationErrors: (req, res, next) => {
+    // Get the result of the validations
     const result = validator.validationResult(req);
+    // Empty result means no errors
     if (result.isEmpty()) {
       return next();
     }
     const errors = {};
+    // Build the error message
     result.array().forEach((error) => {
-      // If there is not already a key for the error, create one
+      // If there is not already a key for the error, create one.
+      // error.path is the name of the field throwing the error.
       if (!errors[error.path]) {
         errors[error.path] = [];
       }
