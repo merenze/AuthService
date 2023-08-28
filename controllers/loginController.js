@@ -11,11 +11,11 @@ module.exports = (req, res) =>
   res
     .status(200)
     .set(
-      "Client-Session",
+      "Authorization",
       jwt.sign(
         {
           sub: req.user.id,
-          purpose: "Client-Session",
+          purpose: "user session id",
           // TODO: EV timeout period
         },
         process.env.JWT_KEY
