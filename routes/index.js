@@ -18,8 +18,16 @@ router.post(
   loginController
 );
 
-router.post("/register", registerController);
-router.post("/validate", validateController);
+router.post(
+  "/register",
+  registerController
+);
+
+router.patch(
+  "/validate",
+  userMiddleware.findUserByValidateToken,
+  validateController
+);
 
 router.get(
   "/whoami",

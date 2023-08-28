@@ -33,6 +33,7 @@ module.exports = {
   },
 
   // Validate that the Client-Session header is associated with a user
+  // TODO move to userMiddleware
   getUserFromSession: async (req, res, next) =>
     axios
       .get(
