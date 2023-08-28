@@ -2,8 +2,30 @@
 const { User } = require("../models/");
 const jwt = require("jsonwebtoken");
 const config = require("../config/");
-const { default: axios } = require("axios");
 const handleServerError = require("../utils/handleServerError");
+
+/**
+ * Helper function to return the decoded token, if valid;
+ * else, send failure response and return undefined.
+ * @param {string} token Token to verify
+ * @param {*} res Response object
+ * @param {string} expiredMessage Message to send if the token is expired
+ * @param {string} [errorMessage] Message to send for internal errors (optional).
+ */
+const verifyToken = (token, res, expiredMessage, errorMessage) => {
+  // Verify the token
+  try {
+    return jwt.verify(token, config.jwtKey);
+  } catch (error) {
+    // Handle expired token
+    if (error.name === "TokenExpiredError") {
+      res.status(401).json(expiredMessage);
+      return;
+    }
+    // Don't bother handling other errors
+    handleServerError(error, res, errorMessage);
+  }
+};
 
 module.exports = {
   /** Get the user from the route param and attach it to the request. */
@@ -28,34 +50,65 @@ module.exports = {
       res.status(404).send();
     }),
 
-  /** Get the user (from an email validation token, provided as a query param) */
-  findUserByValidateToken: async (req, res, next) => {
-    let token;
-    // Verify the token
-    try {
-      token = jwt.verify(req.query.token, config.jwtKey);
-    } catch (error) {
-      // Handle expired token
-      if (error.name === "TokenExpiredError") {
-        res.status(401).json("Validation link expired.");
-        return;
-      }
-      // Don't bother handling other errors
-      handleServerError(error, res);
+  /** Get the user (from the Authorization header) and attach it to the request */
+  findUserBySession: async (req, res, next) => {
+    // Make sure the session is provided
+    const signed = req.get("Authorization");
+    if (!signed) {
+      res
+        .status(400)
+        .json({ message: "Missing session in Authorization header" });
       return;
     }
+    // Verify the token
+    const token = verifyToken(
+      req.get("Authorization"),
+      res,
+      "Session expired",
+      "Bad session"
+    );
+    if (!token) return;
+    // Get the user
+    User.findByPk(token.sub)
+      .then((user) => {
+        // Should not have to explicitly set, but alas.
+        user.isNewRecord = false;
+        if (user) {
+          // Attach the user to the request
+          req.user = user
+          next();
+          return;
+        }
+        // Probably, the token is still valid but the user was deleted.
+        res.status(404).json({ message: "No user found for session." });
+      })
+      .catch((error) => handleServerError(error, res));
+  },
+
+  /** Get the user (from an email validation token, provided as a query param) */
+  findUserByValidateToken: async (req, res, next) => {
+    // Make sure the token is provided
+    if (!req.query.token) {
+      res
+        .status(400)
+        .json({ message: "Missing token in query params" });
+      return;
+    }
+    const token = verifyToken(req.query.token, res, "Validation link expired");
+    if (!token) return;
     // Given a valid token, find the user
     User.findByPk(token.sub)
       .then((user) => {
-        user.isNewRecord = false; // Should not have to explicitly set, but alas.
+        // Should not have to explicitly set, but alas.
+        user.isNewRecord = false;
         // On success, attach the user to the request
         if (user) {
           req.user = user;
           next();
           return;
         }
-        // Handle failure
-        res.status(404).send();
+        // Probably, the token is still valid but the user was deleted.
+        res.status(404).send({ message: "No user found for validate link" });
       })
       .catch((error) => handleServerError(error, res));
   },
