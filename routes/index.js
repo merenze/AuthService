@@ -7,7 +7,6 @@ const registerController = require("../controllers/registerController");
 const validateController = require("../controllers/validateController");
 const userController = require("../controllers/userController");
 const userMiddleware = require("../middleware/userMiddleware");
-const whoamiMiddleware = require("../middleware/whoamiMiddleware");
 
 router.post(
   "/login",
@@ -31,9 +30,7 @@ router.patch(
 
 router.get(
   "/whoami",
-  whoamiMiddleware.sessionProvided,
-  whoamiMiddleware.tokenValid,
-  whoamiMiddleware.getUserFromSession,
+  userMiddleware.findUserBySession,
   userController.find
 );
 
