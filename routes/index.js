@@ -1,5 +1,6 @@
 // routes/index.js
 const express = require("express");
+const validator = require("express-validator");
 const router = express.Router();
 const loginController = require("../controllers/loginController");
 const loginMiddleware = require("../middleware/loginMiddleware");
@@ -10,7 +11,9 @@ const userMiddleware = require("../middleware/userMiddleware");
 
 router.post(
   "/login",
-  loginMiddleware.requiredFields,
+  validator.body("email").trim().notEmpty().withMessage("required"),
+  validator.body("password").notEmpty().withMessage("required"),
+  loginMiddleware.handleInputValidationErrors,
   userMiddleware.findUserByEmail,
   loginMiddleware.comparePassword,
   loginMiddleware.emailValidated,

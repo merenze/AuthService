@@ -1,21 +1,25 @@
 // middleware/loginMiddleware.js
 const bcrypt = require("bcrypt");
 const handleServerError = require("../utils/handleServerError");
+const validator = require("express-validator");
 
 module.exports = {
-  // Validate that the necessary fields are provided in the request body.
-  requiredFields: (req, res, next) => {
-    const missing = [];
-    if (!req.body.email) missing.push("email");
-    if (!req.body.password) missing.push("password");
-    if (missing.length <= 0) {
-      next();
-      return;
+  /** Return a fail response if the input wasn't validated */
+  handleInputValidationErrors: (req, res, next) => {
+    const result = validator.validationResult(req);
+    if (result.isEmpty()) {
+      return next();
     }
-    res.status(400).json({
-      message: "Missing required fields.",
-      missing: missing,
+    const errors = {};
+    result.array().forEach((error) => {
+      // If there is not already a key for the error, create one
+      if (!errors[error.path]) {
+        errors[error.path] = [];
+      }
+      // Push the error to the array
+      errors[error.path].push(error.msg);
     });
+    res.status(400).json({ errors: errors });
   },
 
   // Validate that the user's email is validated
