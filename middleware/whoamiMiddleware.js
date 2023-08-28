@@ -3,6 +3,7 @@
 const { default: axios } = require("axios");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models/");
+const handleServerError = require("../utils/handleServerError");
 
 module.exports = {
   // Validate that the Client-Session header is present
@@ -47,5 +48,5 @@ module.exports = {
         }
         res.status(response.status).json(response.data);
       })
-      .catch((error) => res.status(500).json({ message: error.message })),
+      .catch((error) => handleServerError(error, res)),
 };

@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("../config/");
 const { User } = require("../models/");
+const handleServerError = require("../utils/handleServerError");
 
 /**
  * Create a user with the given data.
@@ -46,18 +47,6 @@ const sendSuccessResponse = (res) => {
   res.status(201).json({
     message:
       "An email was sent to the registered address. Follow the URL to validate your email address and continue as an authenticated user.",
-  });
-};
-
-/**
- * Handles an internal error.
- * @param {*} error
- * @param {*} res
- */
-const handleServerError = (error, res) => {
-  console.error(error);
-  res.status(500).json({
-    message: process.env.NODE_ENV === "development" ? error.message : "Internal error",
   });
 };
 
