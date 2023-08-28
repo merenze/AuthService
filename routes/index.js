@@ -19,7 +19,7 @@ router.post(
 );
 
 router.post("/register", registerController);
-router.post(
+router.patch(
   "/validate",
   userMiddleware.findUserByValidateToken,
   validateController
