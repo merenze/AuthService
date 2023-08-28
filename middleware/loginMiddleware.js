@@ -1,5 +1,6 @@
 // middleware/loginMiddleware.js
 const bcrypt = require("bcrypt");
+const handleServerError = require("../utils/handleServerError");
 
 module.exports = {
   // Validate that the necessary fields are provided in the request body.
@@ -38,5 +39,5 @@ module.exports = {
         }
         res.status(401).json({ message: "Email or password incorrect." });
       })
-      .catch((error) => res.status(500).json({ message: "Internal error." })),
+      .catch((error) => handleServerError(error, res)),
 };

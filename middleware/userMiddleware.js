@@ -3,6 +3,7 @@ const { User } = require("../models/");
 const jwt = require("jsonwebtoken");
 const config = require("../config/");
 const { default: axios } = require("axios");
+const handleServerError = require("../utils/handleServerError");
 
 module.exports = {
   /** Get the user from the route param and attach it to the request. */
@@ -40,8 +41,7 @@ module.exports = {
         return;
       }
       // Don't bother handling other errors
-      console.error(error.name, error.message);
-      res.status(500).json("Internal error.");
+      handleServerError(error, res);
       return;
     }
     // Given a valid token, find the user
@@ -57,15 +57,7 @@ module.exports = {
         // Handle failure
         res.status(404).send();
       })
-      .catch((error) => {
-        console.error(error);
-        res.status(500).json({
-          message:
-            config.env === "development"
-              ? error.message
-              : "Internal error."
-        });
-      });
+      .catch((error) => handleServerError(error, res));
   },
 
   /* Remove sensitive data. */

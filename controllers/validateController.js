@@ -1,4 +1,5 @@
 // controllers/validateController.js
+const handleServerError = require("../utils/handleServerError");
 
 module.exports = async (req, res) => {
   req.user
@@ -6,8 +7,5 @@ module.exports = async (req, res) => {
     .then((user) =>
       res.status(200).json({ message: `Validated ${user.email}` })
     )
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ message: "Error saving user." });
-    });
+    .catch((error) => handleServerError(error, res, "An error ocurred while attempting to save the user."));
 };
