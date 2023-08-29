@@ -41,11 +41,10 @@ module.exports = {
 
   /** Get the user (from an email address provided in the request body) and attach it to the request */
   findUserByEmail: async (req, res, next) =>
-    User.findOne({ where: { email: req.body.email } }).then((user) => {
+    User.findByEmail(req.body.email).then((user) => {
       if (user) {
         req.user = user;
-        next();
-        return;
+        return next();
       }
       res.status(404).send();
     }),
@@ -75,7 +74,7 @@ module.exports = {
         user.isNewRecord = false;
         if (user) {
           // Attach the user to the request
-          req.user = user
+          req.user = user;
           next();
           return;
         }
@@ -89,9 +88,7 @@ module.exports = {
   findUserByValidateToken: async (req, res, next) => {
     // Make sure the token is provided
     if (!req.query.token) {
-      res
-        .status(400)
-        .json({ message: "Missing token in query params" });
+      res.status(400).json({ message: "Missing token in query params" });
       return;
     }
     const token = verifyToken(req.query.token, res, "Validation link expired");

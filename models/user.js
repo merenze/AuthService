@@ -2,11 +2,13 @@
 const { Model, DataTypes } = require("sequelize");
 
 class User extends Model {
-  constructor(props) {
-    super();
-    Object.keys(props).forEach(key => {
-      this[key] = props[key];
-    });
+  /**
+   * 
+   * @param {string} email Email address of the user
+   * @returns {Promise<User>} A promise resolving to the user with the email address.
+   */
+  static async findByEmail(email) {
+    return this.findOne({ where: { email: email } });
   }
 }
 
