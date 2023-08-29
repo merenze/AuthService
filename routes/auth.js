@@ -1,4 +1,4 @@
-// routes/index.js
+// routes/auth.js
 const express = require("express");
 const validator = require("express-validator");
 const router = express.Router();
@@ -8,7 +8,7 @@ const registerController = require("../controllers/registerController");
 const validateController = require("../controllers/validateController");
 const userController = require("../controllers/userController");
 const userMiddleware = require("../middleware/userMiddleware");
-const { User } = require("../models/");
+const { User } = require("../models");
 
 router.post(
   "/login",
