@@ -1,4 +1,4 @@
-// middleware/loginMiddleware.js
+// middleware/authMiddleware.js
 const bcrypt = require("bcrypt");
 const handleServerError = require("../utils/handleServerError");
 const validator = require("express-validator");
@@ -54,7 +54,7 @@ module.exports = {
     res.status(403).json({ message: "Email address already validated." });
   },
 
-  // Compare the password in the request body to the user's password.
+  /** Compare the password in the request body to the user's password. */
   comparePassword: async (req, res, next) =>
     bcrypt
       .compare(req.body.password, req.user.passwordHash)
