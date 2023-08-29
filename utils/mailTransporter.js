@@ -2,17 +2,15 @@
 const nodemailer = require("nodemailer");
 const config = require("../config");
 
-let transporter;
-
 // TODO Enable SMTP transport
-transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   jsonTransport: true,
 });
 
-sendMail = (mailOptions) => {
-  transporter.sendMail(
+module.exports = (mailOptions) => {
+  return transporter.sendMail(
     {
-      from: process.env.MAIL_FROM,
+      from: config.mail.from,
       ...mailOptions,
     },
     (error, info) => {
@@ -24,5 +22,3 @@ sendMail = (mailOptions) => {
     }
   );
 };
-
-module.exports = sendMail;

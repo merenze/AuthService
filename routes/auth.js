@@ -1,23 +1,23 @@
-// routes/index.js
+// routes/auth.js
 const express = require("express");
 const validator = require("express-validator");
 const router = express.Router();
 const loginController = require("../controllers/loginController");
-const loginMiddleware = require("../middleware/loginMiddleware");
+const authMiddleware = require("../middleware/authMiddleware");
 const registerController = require("../controllers/registerController");
 const validateController = require("../controllers/validateController");
 const userController = require("../controllers/userController");
 const userMiddleware = require("../middleware/userMiddleware");
-const { User } = require("../models/");
+const { User } = require("../models");
 
 router.post(
   "/login",
   validator.body("email").trim().notEmpty().withMessage("required"),
   validator.body("password").notEmpty().withMessage("required"),
-  loginMiddleware.handleInputValidationErrors,
+  authMiddleware.handleInputValidationErrors,
   userMiddleware.findUserByEmail,
-  loginMiddleware.comparePassword,
-  loginMiddleware.emailValidated,
+  authMiddleware.comparePassword,
+  authMiddleware.emailValidated,
   loginController
 );
 
@@ -30,14 +30,23 @@ router.post(
       throw new Error("unique");
     }
   }),
-  loginMiddleware.handleInputValidationErrors,
+  authMiddleware.handleInputValidationErrors,
   registerController
+);
+
+router.get(
+  "/validate",
+  validator.body("email").notEmpty().withMessage("required"),
+  userMiddleware.findUserByEmail,
+  authMiddleware.emailNotValidated,
+  validateController.sendEmail
 );
 
 router.patch(
   "/validate",
   userMiddleware.findUserByValidateToken,
-  validateController
+  authMiddleware.emailNotValidated,
+  validateController.validate
 );
 
 router.get(
