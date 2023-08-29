@@ -38,9 +38,9 @@ router.get(
   "/validate",
   validator.body("email").notEmpty().withMessage("required"),
   userMiddleware.findUserByEmail,
-  // TODO Refuse validated emails
+  loginMiddleware.emailNotValidated,
   validateController.sendEmail
-)
+);
 
 router.patch(
   "/validate",

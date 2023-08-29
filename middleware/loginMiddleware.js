@@ -35,7 +35,7 @@ module.exports = {
     res.status(400).json({ errors: errors });
   },
 
-  // Validate that the user's email is validated
+  /** Validate that the user's email is validated */
   emailValidated: (req, res, next) => {
     // TODO EV to determine whether unvalidated users can log in
     if (req.user.emailValidatedAt) {
@@ -43,6 +43,15 @@ module.exports = {
       return;
     }
     res.status(403).json({ message: "Email address not yet validated." });
+  },
+
+  /** Validate that the user's email is NOT validated */
+  emailNotValidated: (req, res, next) => {
+    if (!req.user.emailValidatedAt) {
+      next();
+      return;
+    }
+    res.status(403).json({ message: "Email address already validated." });
   },
 
   // Compare the password in the request body to the user's password.
