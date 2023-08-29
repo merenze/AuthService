@@ -8,6 +8,7 @@ const registerController = require("../controllers/registerController");
 const validateController = require("../controllers/validateController");
 const userController = require("../controllers/userController");
 const userMiddleware = require("../middleware/userMiddleware");
+const { User } = require("../models/");
 
 router.post(
   "/login",
@@ -24,7 +25,11 @@ router.post(
   "/register",
   validator.body("email").trim().isEmail().withMessage("Invalid email format"),
   validator.body("password").notEmpty().withMessage("required"),
-  // TODO Custom validator for unique emails
+  validator.body("email").custom(async email => {
+    if (await User.findByEmail(email)) {
+      throw new Error("unique");
+    }
+  }),
   loginMiddleware.handleInputValidationErrors,
   registerController
 );
