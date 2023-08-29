@@ -34,10 +34,18 @@ router.post(
   registerController
 );
 
+router.get(
+  "/validate",
+  validator.body("email").notEmpty().withMessage("required"),
+  userMiddleware.findUserByEmail,
+  // TODO Refuse validated emails
+  validateController.sendEmail
+)
+
 router.patch(
   "/validate",
   userMiddleware.findUserByValidateToken,
-  validateController
+  validateController.validate
 );
 
 router.get(
