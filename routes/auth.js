@@ -25,7 +25,7 @@ router.post(
   "/register",
   validator.body("email").trim().isEmail().withMessage("Invalid email format"),
   validator.body("password").notEmpty().withMessage("required"),
-  validator.body("email").custom(async email => {
+  validator.body("email").custom(async (email) => {
     if (await User.findByEmail(email)) {
       throw new Error("unique");
     }
@@ -44,6 +44,8 @@ router.get(
 
 router.patch(
   "/validate",
+  validator.query("token").notEmpty().withMessage("required"),
+  authMiddleware.handleInputValidationErrors,
   userMiddleware.findUserByValidateToken,
   authMiddleware.emailNotValidated,
   validateController.validate
@@ -52,19 +54,15 @@ router.patch(
 router.get(
   "/password-reset",
   // TODO Password reset email request
-  res => res.status(200).send()
+  (res) => res.status(200).send()
 );
 
 router.patch(
   "/password-reset",
   // TODO Password reset change request
-  res = res.status(204).send()
-)
-
-router.get(
-  "/whoami",
-  userMiddleware.findUserBySession,
-  userController.find
+  (res) => res.status(204).send()
 );
+
+router.get("/whoami", userMiddleware.findUserBySession, userController.find);
 
 module.exports = router;

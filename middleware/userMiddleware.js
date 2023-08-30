@@ -6,8 +6,9 @@ const handleServerError = require("../utils/handleServerError");
 
 /** Maps token purpose to expiration message */
 const tokenExpiredErrorMessage = {
-  validate: "Validation link expired",
+  validateEmail: "Validation link expired",
   resetPassword: "Password reset link expired",
+  sessionId: "Session expired",
 };
 
 /**
@@ -20,13 +21,16 @@ const tokenExpiredErrorMessage = {
  * @return {*} Decoded token, if the token passes verification; else false.
  */
 const verifyToken = (token, res, purpose, errorMessage) => {
+  console.debug("verifying token");
   let verified;
   // Verify the token
   try {
     verified = jwt.verify(token, config.jwtKey);
   } catch (error) {
+    console.debug("problem");
     // Handle expired token
     if (error.name === "TokenExpiredError") {
+      console.debug("expired");
       res.status(401).json({ message: tokenExpiredErrorMessage[purpose] });
       return false;
     }
@@ -35,10 +39,16 @@ const verifyToken = (token, res, purpose, errorMessage) => {
     return false;
   }
   // Verify purpose
-  if (token.purpose !== purpose) {
-    res.status(403).json({ message: `Provided token purpose "${token.purpose}" not valid for this route.` });
+  if (verified.purpose !== purpose) {
+    console.debug("purpose");
+    res
+      .status(403)
+      .json({
+        message: `Provided token purpose '${verified.purpose}' not valid for this route.`,
+      });
     return false;
   }
+  console.debug("verified!");
   return verified;
 };
 
@@ -67,6 +77,7 @@ module.exports = {
   /** Get the user (from the Authorization header) and attach it to the request */
   findUserBySession: async (req, res, next) => {
     // Make sure the session is provided
+    // TODO use express-validator for this
     const signed = req.get("Authorization");
     if (!signed) {
       res
@@ -75,12 +86,7 @@ module.exports = {
       return;
     }
     // Verify the token
-    const token = verifyToken(
-      req.get("Authorization"),
-      res,
-      "Session expired",
-      "Bad session"
-    );
+    const token = verifyToken(req.get("Authorization"), res, "sessionId");
     if (!token) return;
     // Get the user
     User.findByPk(token.sub)
@@ -99,10 +105,10 @@ module.exports = {
       .catch((error) => handleServerError(error, res));
   },
 
-  /** Get the user (from an email validation token, provided as a query param) */
+  /** Get the user (from an email validation token, provided as a query param) and attach it to the request object. */
   findUserByValidateToken: async (req, res, next) => {
     // Existence of token should be validated by authMiddleware.tokenExists
-    const token = verifyToken(req.query.token, res, purpose);
+    const token = verifyToken(req.query.token, res, "validateEmail");
     if (!token) return;
     // Given a valid token, find the user
     User.findByPk(token.sub)
@@ -131,5 +137,5 @@ module.exports = {
   findUserByResetToken: async (req, res, next) => {
     // TODO
     next();
-  }
+  },
 };

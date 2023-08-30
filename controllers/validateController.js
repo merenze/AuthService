@@ -7,13 +7,14 @@ const sendMail = require("../utils/mailTransporter");
 module.exports = {
   /** Send the validation email to the user attached to the request. */
   sendEmail: async (req, res) => {
+    console.log(config.emailValidateExpirationHours);
     const token = jwt.sign(
       {
         sub: req.user.id,
         purpose: "validateEmail",
-        maxAge: config.emailValidateExpirationHours * 3600
       },
-      config.jwtKey
+      config.jwtKey,
+      { expiresIn: config.emailValidateExpirationHours * 3600 }
     );
     const validateUrl = `${config.url}/validate?token=${token}`;
     // TODO replace with a mailer service
@@ -30,9 +31,7 @@ module.exports = {
   validate: async (req, res) => {
     req.user
       .update({ emailValidatedAt: new Date() })
-      .then((user) =>
-        res.status(204).send()
-      )
+      .then((user) => res.status(204).send())
       .catch((error) =>
         handleServerError(
           error,
