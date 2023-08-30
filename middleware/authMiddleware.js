@@ -8,10 +8,15 @@ module.exports = {
    * Return a fail response if the input wasn't valid.
    * The failure response message is structured as follows:
    * {
-   *   errors: {
+   *   query: {
    *     field1: [ "errormsg1", ... ],
    *     field2: [ "errormsg1", ... ],
-   *   }
+   *   },
+   *   body: {
+   *     field1: [ "errormsg1", ... ],
+   *     field2: [ "errormsg1", ... ],
+   *   },
+   *   ...
    * }
    */
   handleInputValidationErrors: (req, res, next) => {
@@ -24,15 +29,22 @@ module.exports = {
     const errors = {};
     // Build the error message
     result.array().forEach((error) => {
+      // If there is not already a key for the error's location, create one.
+      // error.location is where the error lives (query, body, etc.).
+      if (!errors[error.location]) {
+        errors[error.location] = {};
+      }
       // If there is not already a key for the error, create one.
       // error.path is the name of the field throwing the error.
-      if (!errors[error.path]) {
-        errors[error.path] = [];
+      if (!errors[error.location][error.path]) {
+        errors[error.location][error.path] = [];
       }
       // Push the error to the array
-      errors[error.path].push(error.msg);
+      errors[error.location][error.path].push(error.msg);
     });
-    res.status(400).json({ errors: errors });
+    res
+      .status(400)
+      .json({ message: "Error validating request.", errors: errors });
   },
 
   /** Validate that the user's email is validated */
