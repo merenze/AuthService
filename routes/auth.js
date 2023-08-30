@@ -50,6 +50,18 @@ router.patch(
 );
 
 router.get(
+  "/password-reset",
+  // TODO Password reset email request
+  res => res.status(200).send()
+);
+
+router.patch(
+  "/password-reset",
+  // TODO Password reset change request
+  res = res.status(204).send()
+)
+
+router.get(
   "/whoami",
   userMiddleware.findUserBySession,
   userController.find
