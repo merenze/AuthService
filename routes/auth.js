@@ -37,7 +37,7 @@ router.post(
 
 router.get(
   "/validate",
-  validator.body("email").notEmpty().withMessage("required"),
+  validator.body("email").trim().notEmpty().withMessage("required"),
   userMiddleware.findUserByEmail,
   authMiddleware.emailNotValidated,
   validateController.sendEmail
@@ -54,13 +54,15 @@ router.patch(
 
 router.post(
   "/password-reset",
-  // TODO Password reset email request
+  validator.body("email").trim().notEmpty().withMessage("required"),
+  userMiddleware.findUserByEmail,
+  authMiddleware.emailValidated,
   resetPasswordController.sendResetEmail
 );
 
 router.patch(
   "/password-reset",
-  // TODO Password reset change request
+  // TODO Add validators
   resetPasswordController.setPassword
 );
 
