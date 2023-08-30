@@ -7,13 +7,11 @@ const sendMail = require("../utils/mailTransporter");
 module.exports = {
   /** Send the validation email to the user attached to the request. */
   sendEmail: async (req, res) => {
-    const now = new Date();
-    const exp = new Date(now);
-    exp.setHours(now.getHours() + config.emailValidateExpirationHours);
     const token = jwt.sign(
       {
         sub: req.user.id,
-        exp: exp.getTime(),
+        purpose: "validateEmail",
+        maxAge: config.emailValidateExpirationHours * 3600
       },
       config.jwtKey
     );
@@ -26,14 +24,14 @@ module.exports = {
       // TODO give more info than just the link-- probably use a view as a template.
       text: validateUrl,
     });
-    res.status(200).send();
+    res.status(204).send();
   },
 
   validate: async (req, res) => {
     req.user
       .update({ emailValidatedAt: new Date() })
       .then((user) =>
-        res.status(200).json({ message: `Validated ${user.email}` })
+        res.status(204).send()
       )
       .catch((error) =>
         handleServerError(
