@@ -63,6 +63,11 @@ router.patch(
   (res) => res.status(204).send()
 );
 
-router.get("/whoami", userMiddleware.findUserBySession, userController.find);
+router.get(
+  "/whoami",
+  userMiddleware.findUserBySession,
+  userMiddleware.sanitizeUser,
+  userController.find
+);
 
 module.exports = router;
