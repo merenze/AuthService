@@ -4,27 +4,42 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/");
 const handleServerError = require("../utils/handleServerError");
 
+/** Maps token purpose to expiration message */
+const tokenExpiredErrorMessage = {
+  validate: "Validation link expired",
+  resetPassword: "Password reset link expired",
+};
+
 /**
  * Helper function to return the decoded token, if valid;
- * else, send failure response and return undefined.
+ * else, send failure response and return false.
  * @param {string} token Token to verify
  * @param {*} res Response object
- * @param {string} expiredMessage Message to send if the token is expired
+ * @param {string} purpose Attempted use of token (mismatch with decoded token's purpose results in 403).
  * @param {string} [errorMessage] Message to send for internal errors (optional).
+ * @return {*} Decoded token, if the token passes verification; else false.
  */
-const verifyToken = (token, res, expiredMessage, errorMessage) => {
+const verifyToken = (token, res, purpose, errorMessage) => {
+  let verified;
   // Verify the token
   try {
-    return jwt.verify(token, config.jwtKey);
+    verified = jwt.verify(token, config.jwtKey);
   } catch (error) {
     // Handle expired token
     if (error.name === "TokenExpiredError") {
-      res.status(401).json(expiredMessage);
-      return;
+      res.status(401).json({ message: tokenExpiredErrorMessage[purpose] });
+      return false;
     }
     // Don't bother handling other errors
     handleServerError(error, res, errorMessage);
+    return false;
   }
+  // Verify purpose
+  if (token.purpose !== purpose) {
+    res.status(403).json({ message: `Provided token purpose "${token.purpose}" not valid for this route.` });
+    return false;
+  }
+  return verified;
 };
 
 module.exports = {
@@ -86,12 +101,8 @@ module.exports = {
 
   /** Get the user (from an email validation token, provided as a query param) */
   findUserByValidateToken: async (req, res, next) => {
-    // Make sure the token is provided
-    if (!req.query.token) {
-      res.status(400).json({ message: "Missing token in query params" });
-      return;
-    }
-    const token = verifyToken(req.query.token, res, "Validation link expired");
+    // Existence of token should be validated by authMiddleware.tokenExists
+    const token = verifyToken(req.query.token, res, purpose);
     if (!token) return;
     // Given a valid token, find the user
     User.findByPk(token.sub)
@@ -115,4 +126,10 @@ module.exports = {
     req.user.passwordHash = undefined;
     next();
   },
+
+  /** Get the user (from a password reset token, provided as a query param) and attach it to the request. */
+  findUserByResetToken: async (req, res, next) => {
+    // TODO
+    next();
+  }
 };
