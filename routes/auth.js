@@ -6,6 +6,7 @@ const loginController = require("../controllers/loginController");
 const authMiddleware = require("../middleware/authMiddleware");
 const registerController = require("../controllers/registerController");
 const validateController = require("../controllers/validateController");
+const resetPasswordController = require("../controllers/resetPasswordController");
 const userController = require("../controllers/userController");
 const userMiddleware = require("../middleware/userMiddleware");
 const { User } = require("../models");
@@ -51,16 +52,16 @@ router.patch(
   validateController.validate
 );
 
-router.get(
+router.post(
   "/password-reset",
   // TODO Password reset email request
-  (res) => res.status(200).send()
+  resetPasswordController.sendResetEmail
 );
 
 router.patch(
   "/password-reset",
   // TODO Password reset change request
-  (res) => res.status(204).send()
+  resetPasswordController.setPassword
 );
 
 router.get(
