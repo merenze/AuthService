@@ -71,15 +71,6 @@ module.exports = {
 
   /** Get the user (from the Authorization header) and attach it to the request */
   findUserBySession: async (req, res, next) => {
-    // Make sure the session is provided
-    // TODO use express-validator for this
-    const signed = req.get("Authorization");
-    if (!signed) {
-      res
-        .status(400)
-        .json({ message: "Missing session in Authorization header" });
-      return;
-    }
     // Verify the token
     const token = verifyToken(req.get("Authorization"), res, "sessionId");
     if (!token) {

@@ -66,12 +66,12 @@ router.patch(
   validator.query("token").notEmpty().withMessage("required"),
   authMiddleware.handleInputValidationErrors,
   userMiddleware.findUserByResetToken,
-  // TODO Add validators
   resetPasswordController.setPassword
 );
 
 router.get(
   "/whoami",
+  validator.header("Authorization").notEmpty().withMessage("required"),
   userMiddleware.findUserBySession,
   userMiddleware.sanitizeUser,
   userController.find
