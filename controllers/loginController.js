@@ -8,7 +8,10 @@ const config = require("../config/");
  * @param {*} res
  * @param {*} next
  */
-module.exports = (req, res) =>
+module.exports = (req, res) => {
+  const options = config.sessionExpirationHours !== undefined
+    ? { expiresIn: config.sessionExpirationHours * 3600 }
+    : undefined;
   res
     .status(200)
     .set(
@@ -19,7 +22,8 @@ module.exports = (req, res) =>
           purpose: "sessionId",
         },
         process.env.JWT_KEY,
-        { expiresIn: config.sessionExpirationHours }
+        options
       )
     )
     .send();
+};
