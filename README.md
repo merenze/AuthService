@@ -9,6 +9,7 @@ Current features include:
 * Authenticate with registered credentials
 * Get the logged-in user
 * Get a user by ID
+* Reset a user's password
 
 This project is a solo experiment, and the first of a series I plan to build in order to learn Node/Express, API security, and the microservices architecture.
 
