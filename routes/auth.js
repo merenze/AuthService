@@ -55,6 +55,7 @@ router.patch(
 router.post(
   "/password-reset",
   validator.body("email").trim().notEmpty().withMessage("required"),
+  authMiddleware.handleInputValidationErrors,
   userMiddleware.findUserByEmail,
   authMiddleware.emailValidated,
   resetPasswordController.sendResetEmail

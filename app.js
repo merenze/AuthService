@@ -10,6 +10,9 @@ var authRouter = require("./routes/auth");
 var mailRouter = require("./routes/mail");
 var usersRouter = require("./routes/users");
 
+// Logging
+const pino = require("pino");
+
 var app = express();
 
 // view engine setup
@@ -17,6 +20,20 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
 app.use(logger("dev"));
+const pinoLogger =
+  process.env.NODE_ENV === "development"
+    ? pino({
+        transport: {
+          target: "pino-pretty",
+          options: { colorize: true },
+        },
+        level: process.env.LOG_LEVEL || "info",
+      })
+    : pino({});
+app.use((req, res, next) => {
+  req.logger = pinoLogger.child({ requestId: req.id });
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -33,6 +50,7 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
+  req.logger.error(err);
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};

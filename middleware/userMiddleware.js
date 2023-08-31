@@ -21,13 +21,11 @@ const tokenExpiredErrorMessage = {
  * @return {*} Decoded token, if the token passes verification; else false.
  */
 const verifyToken = (token, res, purpose, errorMessage) => {
-  console.debug("verifying token");
   let verified;
   // Verify the token
   try {
     verified = jwt.verify(token, config.jwtKey);
   } catch (error) {
-    console.debug("problem");
     // Handle expired token
     if (error.name === "TokenExpiredError") {
       console.debug("expired");
@@ -40,7 +38,6 @@ const verifyToken = (token, res, purpose, errorMessage) => {
   }
   // Verify purpose
   if (verified.purpose !== purpose) {
-    console.debug("purpose");
     res
       .status(403)
       .json({
@@ -48,7 +45,6 @@ const verifyToken = (token, res, purpose, errorMessage) => {
       });
     return false;
   }
-  console.debug("verified!");
   return verified;
 };
 
@@ -68,6 +64,7 @@ module.exports = {
   findUserByEmail: async (req, res, next) =>
     User.findByEmail(req.body.email).then((user) => {
       if (user) {
+        req.logger.debug(`Found user: ${user.email}`);
         req.user = user;
         return next();
       }

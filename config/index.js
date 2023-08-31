@@ -36,6 +36,7 @@ module.exports = {
   bcryptRounds: process.env.BCRYPT_ROUNDS || 10,
   jwtKey: process.env.JWT_KEY,
   emailValidateExpirationHours:
-    process.env.EMAIL_VALIDATE_EXPIRATION_HOURS || 0,
-  sessionExpirationHours: process.env.SESSION_EXPIRATION_HOURS || 0,
+    process.env.EMAIL_VALIDATE_EXPIRATION_HOURS || undefined,
+  passwordResetExpirationHours: process.env.PASSWORD_RESET_EXPIRATION_HOURS || undefined,
+  sessionExpirationHours: process.env.SESSION_EXPIRATION_HOURS || undefined,
 };

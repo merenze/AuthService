@@ -22,6 +22,7 @@ module.exports = {
   handleInputValidationErrors: (req, res, next) => {
     // Get the result of the validations
     const result = validator.validationResult(req);
+    req.logger.debug(`Found ${result.length || 0} error(s) with input`);
     // Empty result means no errors
     if (result.isEmpty()) {
       return next();

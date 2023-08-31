@@ -1,5 +1,6 @@
 // controllers/login.js
 const jwt = require("jsonwebtoken");
+const config = require("../config/");
 
 /**
  * The login controller action.
@@ -16,9 +17,9 @@ module.exports = (req, res) =>
         {
           sub: req.user.id,
           purpose: "sessionId",
-          // TODO: EV timeout period
         },
-        process.env.JWT_KEY
+        process.env.JWT_KEY,
+        { expiresIn: config.sessionExpirationHours }
       )
     )
     .send();
