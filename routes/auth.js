@@ -63,6 +63,9 @@ router.post(
 
 router.patch(
   "/password-reset",
+  validator.query("token").notEmpty().withMessage("required"),
+  authMiddleware.handleInputValidationErrors,
+  userMiddleware.findUserByResetToken,
   // TODO Add validators
   resetPasswordController.setPassword
 );
