@@ -6,6 +6,7 @@ const loginController = require("../controllers/loginController");
 const authMiddleware = require("../middleware/authMiddleware");
 const registerController = require("../controllers/registerController");
 const validateController = require("../controllers/validateController");
+const resetPasswordController = require("../controllers/resetPasswordController");
 const userController = require("../controllers/userController");
 const userMiddleware = require("../middleware/userMiddleware");
 const { User } = require("../models");
@@ -25,7 +26,7 @@ router.post(
   "/register",
   validator.body("email").trim().isEmail().withMessage("Invalid email format"),
   validator.body("password").notEmpty().withMessage("required"),
-  validator.body("email").custom(async email => {
+  validator.body("email").custom(async (email) => {
     if (await User.findByEmail(email)) {
       throw new Error("unique");
     }
@@ -36,7 +37,7 @@ router.post(
 
 router.get(
   "/validate",
-  validator.body("email").notEmpty().withMessage("required"),
+  validator.body("email").trim().notEmpty().withMessage("required"),
   userMiddleware.findUserByEmail,
   authMiddleware.emailNotValidated,
   validateController.sendEmail
@@ -44,14 +45,35 @@ router.get(
 
 router.patch(
   "/validate",
+  validator.query("token").notEmpty().withMessage("required"),
+  authMiddleware.handleInputValidationErrors,
   userMiddleware.findUserByValidateToken,
   authMiddleware.emailNotValidated,
   validateController.validate
 );
 
+router.post(
+  "/password-reset",
+  validator.body("email").trim().notEmpty().withMessage("required"),
+  authMiddleware.handleInputValidationErrors,
+  userMiddleware.findUserByEmail,
+  authMiddleware.emailValidated,
+  resetPasswordController.sendResetEmail
+);
+
+router.patch(
+  "/password-reset",
+  validator.query("token").notEmpty().withMessage("required"),
+  authMiddleware.handleInputValidationErrors,
+  userMiddleware.findUserByResetToken,
+  resetPasswordController.setPassword
+);
+
 router.get(
   "/whoami",
+  validator.header("Authorization").notEmpty().withMessage("required"),
   userMiddleware.findUserBySession,
+  userMiddleware.sanitizeUser,
   userController.find
 );
 

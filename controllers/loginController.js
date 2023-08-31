@@ -1,5 +1,6 @@
 // controllers/login.js
 const jwt = require("jsonwebtoken");
+const config = require("../config/");
 
 /**
  * The login controller action.
@@ -7,7 +8,10 @@ const jwt = require("jsonwebtoken");
  * @param {*} res
  * @param {*} next
  */
-module.exports = (req, res) =>
+module.exports = (req, res) => {
+  const options = config.sessionExpirationHours !== undefined
+    ? { expiresIn: config.sessionExpirationHours * 3600 }
+    : undefined;
   res
     .status(200)
     .set(
@@ -15,10 +19,11 @@ module.exports = (req, res) =>
       jwt.sign(
         {
           sub: req.user.id,
-          purpose: "user session id",
-          // TODO: EV timeout period
+          purpose: "sessionId",
         },
-        process.env.JWT_KEY
+        process.env.JWT_KEY,
+        options
       )
     )
     .send();
+};

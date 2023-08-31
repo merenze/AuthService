@@ -20,7 +20,6 @@ module.exports = async (req, res) => {
   bcrypt
     .hash(req.body.password, parseInt(process.env.BCRYPT_ROUNDS))
     .then((hash) => createUser(req, hash))
-    .then(sendEmailValidation)
     .then(() => res.status(201).send())
     .catch((error) => handleServerError(error, res));
 };
