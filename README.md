@@ -35,7 +35,11 @@ DB_DATABASE=my_database_name
 DB_USER=my_database_username
 DB_PASSWORD=my_database_password
 ```
-And start the service:
+Run the Sequelize database migrations:
+```bash
+npx sequelize-cli db:migrate
+```
+And finally, start the service:
 ```bash
 npm start
 ```
