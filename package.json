@@ -29,6 +29,7 @@
     "cross-env": "^7.0.3",
     "mocha": "^10.2.0",
     "pino-pretty": "^10.2.0",
+    "sqlite3": "^5.1.6",
     "supertest": "^6.3.3"
   }
 }

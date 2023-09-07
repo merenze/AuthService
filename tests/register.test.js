@@ -1,9 +1,12 @@
 // tests/auth.test.js
 const { describe, done } = require("mocha");
+const { sequelize } = require("../models/");
 const app = require("../app");
 const supertest = require("supertest");
 const request = supertest(app);
 const assert = require("assert");
+
+sequelize.sync({ force: true });
 
 describe("Register endpoint", async () => {
   it("should respond with status 400 when email is not present", (done) => {
