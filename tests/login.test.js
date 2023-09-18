@@ -37,13 +37,13 @@ describe("Login endpoint", async () => {
 
   it("should respond 401 when password is incorrect", (done) => {
     request
-      .post("/login")
+      .post("/register")
       .send({
         email: "john.login@example.com",
         password: "johnpw",
       })
       .expect(201)
-      .then(() =>
+      .end(() =>
         request
           .post("/login")
           .send({
