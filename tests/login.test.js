@@ -42,7 +42,6 @@ describe("Login endpoint", async () => {
         email: "john.login@example.com",
         password: "johnpw",
       })
-      .expect(201)
       .end(() =>
         request
           .post("/login")
@@ -53,5 +52,48 @@ describe("Login endpoint", async () => {
           .expect(401)
           .end((err) => (err ? done(err) : done()))
       );
+  });
+
+  it("should respond 403 when email and password are correct but email isn't validated", (done) => {
+    request
+      .post("/register")
+      .send({
+        email: "john.login@example.com",
+        password: "johnpw",
+      })
+      .end(() =>
+        request
+          .post("/login")
+          .send({
+            email: "john.login@example.com",
+            password: "johnpw",
+          })
+          .expect(403)
+          .end((err) => (err ? done(err) : done()))
+      );
+  });
+
+  it("should respond 200 when email and password are correct and email is validated", (done) => {
+    request
+      .post("/register")
+      .send({
+        email: "john.login@example.com",
+        password: "johnpw",
+      })
+      .end(async () => {
+        await sequelize
+          .query(
+            `UPDATE users SET emailValidatedAt = '${new Date()}' WHERE email = 'john.login@example.com'`
+          )
+          .catch((err) => done(err));
+        request
+          .post("/login")
+          .send({
+            email: "john.login@example.com",
+            password: "johnpw",
+          })
+          .expect(200)
+          .end((err) => (err ? done(err) : done()));
+      });
   });
 });
