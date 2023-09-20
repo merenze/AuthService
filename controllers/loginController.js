@@ -14,16 +14,13 @@ module.exports = (req, res) => {
     : undefined;
   res
     .status(200)
-    .set(
-      "Authorization",
-      jwt.sign(
+    .json(jwt.sign(
         {
           sub: req.user.id,
           purpose: "sessionId",
         },
-        process.env.JWT_KEY,
+        config.jwtKey,
         options
-      )
-    )
-    .send();
+      ),
+    );
 };
