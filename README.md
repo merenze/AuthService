@@ -37,11 +37,13 @@ DB_PASSWORD=my_database_password
 ```
 Run the Sequelize database migrations:
 ```bash
+cd AuthService
 npx sequelize-cli db:migrate
 ```
-And finally, start the service:
+Build and start the service:
 ```bash
-npm start
+docker build -t auth .
+docker run -dp 3000:3000 auth
 ```
 TODO: API reference documentation
 
