@@ -14,8 +14,7 @@ module.exports = (req, res) => {
     : undefined;
   res
     .status(200)
-    .json({
-      session: jwt.sign(
+    .json(jwt.sign(
         {
           sub: req.user.id,
           purpose: "sessionId",
@@ -23,5 +22,5 @@ module.exports = (req, res) => {
         config.jwtKey,
         options
       ),
-    });
+    );
 };
