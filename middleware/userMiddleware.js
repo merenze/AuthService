@@ -33,7 +33,7 @@ const verifyToken = (token, res, purpose, errorMessage) => {
       return false;
     }
     // Don't bother handling other errors
-    handleServerError(error, res, errorMessage);
+    res.status(403).json({ message: "invalid token" });
     return false;
   }
   // Verify purpose
@@ -71,8 +71,27 @@ module.exports = {
 
   /** Get the user (from the Authorization header) and attach it to the request */
   findUserBySession: async (req, res, next) => {
+    // Verify presence of header
+    const auth = req.get("Authorization");
+    if (!auth) {
+      return res.status(403).json({
+        message: "Authorization header required for this route",
+      });
+    }
+    // Validate the header
+    const [scheme, credentials] = auth.split(" ");
+    if (scheme !== "Bearer") {
+      return res.status(403).json({
+        message: `Authorization scheme '${scheme}' not accepted by this route`,
+      });
+    }
+    if (!credentials) {
+      return res.status(403).json({
+        message: `Missing credentials in Authorization header`,
+      });
+    }
     // Verify the token
-    const token = verifyToken(req.get("Authorization"), res, "sessionId");
+    const token = verifyToken(credentials, res, "sessionId");
     if (!token) {
       return;
     }
