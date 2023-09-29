@@ -45,10 +45,3 @@ Build and start the service:
 docker build -t auth .
 docker run -dp 3000:3000 auth
 ```
-TODO: API reference documentation
-
-## Contributing
-Thank you for your interest in contributing to this project.
-However, this is a learning experience for me, so I will remain the sole developer for the forseeable future.
-As such, I am not accepting pull requests.
-Feel free to report bugs or open issues.
