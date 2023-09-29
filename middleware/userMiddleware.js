@@ -150,7 +150,7 @@ module.exports = {
           return next();
         }
         // Probably, the token is still valid but the user was deleted.
-        res.status(404).send({ message: "No user found for validate link" });
+        res.status(404).send({ message: "No user found for reset link" });
       })
       .catch((error) => handleServerError(error, res));
     next();
