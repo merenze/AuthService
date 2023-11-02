@@ -43,5 +43,5 @@ npx sequelize-cli db:migrate
 Build and start the service:
 ```bash
 docker build -t auth .
-docker run -dp 3000:3000 auth
+docker run --env-file ./.env -dp 3000:3000 auth
 ```
