@@ -1,6 +1,6 @@
 name: build-push-container-image
 on:
-  merge:
+  push:
     branches:
     - master
 jobs:
